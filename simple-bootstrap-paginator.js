@@ -6,44 +6,77 @@
 
   var pluginName = 'simplePaginator';
   var defaults = {
-      propertyName: 'value'
+      maxButtonsVisible: 5,
+      totalPages: 1,
+      currentPage: 1,
+      pageChange: function(page) { console.log(page) }
     };
 
+    /*
+    * Function that define the plugin
+    * element - the DOM element
+    * options - object with the plugin options
+    */
     function Plugin(element, options) {
       this.element = element;
 
       this.options = $.extend({}, defaults, options);
-
       this._defaults = defaults;
       this._name = pluginName;
 
-      this.changeValue = function(val) {
-        this.options.propertyName = val;
-        this.init();
+      this.changeTotalPages = function(total) {
+        this.options.totalPages = total;
+        createPaginator(this);
+      }
+
+      this.changePage = function(page) {
+        this.options.pageChange(page);
       }
 
       this.init();
     }
     Plugin.prototype.init = function() {
-        $(this.element).text(this.options.propertyName);
+        //$(this.element).text(this.options.propertyName);
+        // For now, only call createPaginator()
+        createPaginator(this);
     };
+    createPaginator = function(obj) {
+        var self = obj;
+        //Clear the this.element
+        $(self.element).empty();
+        str = '<ul class="pagination">';
+        for (var i = 0; i < self.options.totalPages; i++) {
+          str = str.concat('<li><a>' + (i + 1) + '</a></li>')
+        }
+        str = str.concat('</ul>');
+        $(self.element).append(str);
+        $(self.element).find('ul li').click(function() {
+          self.changePage($(this).find('a').text());
+        })
+    }
 
     $.fn[pluginName] = function(options) {
+      /*
+       * Get the arguments
+       */
       var args = $.makeArray(arguments);
       var after = args.slice(1);
 
       return this.each(function() {
-
-        // Verifico se existe instancia
+        // Verify if already exists a plugin instance.
         var instance = $.data(this, 'plugin_' + pluginName);
 
+        /*
+         * If exists, execute the method described in options param.
+         */
         if (instance) {
           if (instance[options]) {
             instance[options].apply(instance, after);
           } else {
-            $.error('Method ' + options + 'doesn\' exists');
+            $.error('Method ' + options + 'doesn\'t exists');
           }
         } else {
+          // Create and register the Plugin.
           var plugin = new Plugin(this, options);
           $.data(this, 'plugin_' + pluginName, plugin);
           return plugin;
