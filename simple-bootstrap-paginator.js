@@ -7,7 +7,7 @@
   var pluginName = 'simplePaginator';
   var defaults = {
       maxButtonsVisible: 5,
-      totalPages: 1,
+      totalPages: 7,
       currentPage: 1,
       pageChange: function(page) { console.log(page) }
     };
@@ -18,19 +18,32 @@
     * options - object with the plugin options
     */
     function Plugin(element, options) {
-      this.element = element;
+      //TODO:  Verify the other options.
 
+      if (!options.pageChange) {
+        $.error('function pageChange() its not defined');
+      } else {
+        if (typeof options.pageChange !== 'function') {
+          $.error('pageChange is not a function');
+        }
+      }
+
+      this.element = element;
       this.options = $.extend({}, defaults, options);
       this._defaults = defaults;
       this._name = pluginName;
 
-      this.changeTotalPages = function(total) {
+      changeTotalButtons(this);             // Change total buttons created by the Paginator
+
+      this.setTotalPages = function(total) {
         this.options.totalPages = total;
+        changeTotalButtons(this);
         createPaginator(this);
       }
 
       this.changePage = function(page) {
         this.options.pageChange(page);
+        createPaginator(this);
       }
 
       this.init();
@@ -40,18 +53,102 @@
         // For now, only call createPaginator()
         createPaginator(this);
     };
-    createPaginator = function(obj) {
-        var self = obj;
+
+    changeTotalButtons = function(self) {
+      self.options.totalButtons = Math.min(self.options.totalPages, self.options.maxButtonsVisible);
+    };
+
+    createPaginator = function(self) {
+        var opt = self.options;
         //Clear the this.element
         $(self.element).empty();
-        str = '<ul class="pagination">';
-        for (var i = 0; i < self.options.totalPages; i++) {
-          str = str.concat('<li><a>' + (i + 1) + '</a></li>')
+
+        var str = '<ul class="pagination">';
+        // Create the prev button
+        if (opt.currentPage == 1) {
+          str = str.concat('<li class="disabled"><a>prev</a></li>')
+        } else {
+          str = str.concat('<li><a>prev</a></li>');
         }
+
+        // Create the numeric buttons.
+        // Variable of number control in the buttons.
+        var begin = 1;
+        var end = begin + opt.totalButtons - 1;
+
+        /*
+         * TODO: Align the values in the begin and end variables if the user has the
+         * possibility that select a page that doens't appear in the paginador.
+         * e.g currentPage = 1, and user go to the 20 page.
+         */
+        while ((opt.currentPage < begin) || (opt.currentPage > end)) {
+          if (opt.currentPage > end) {
+             begin += opt.totalButtons;
+             end += opt.totalButtons;
+
+             if (end > opt.totalPages) {
+               begin = begin - (end - opt.totalPages);
+               end = opt.totalPages;
+             }
+           } else {
+             begin -= opt.totalButtons;
+             end -= opt.totalButtons;
+
+             if (begin < 0) {
+               end = end + (begin + opt.totalButtons);
+               begin = 1;
+             }
+           }
+       }
+       /*
+        * Verify if the user clicks in the last page show by paginator.
+        * If yes, the paginator advances.
+        */
+        if ((opt.currentPage === end) && (opt.totalPages != 1)) {
+          begin = opt.currentPage - 1;
+          end = begin + opt.totalButtons - 1;
+
+          if (end >= opt.totalPages) {
+            begin = begin - (end - (opt.totalPages));
+            end = opt.totalPages;
+          }
+        }
+
+        /*
+         * Verify it the user clicks in the first page show by paginator.
+         * If yes, the paginator retrogress
+         */
+         if ((begin === opt.currentPage) && (opt.totalPages != 1)) {
+           if (opt.currentPage != 1) {
+             end = opt.currentPage + 1;
+             begin = end - (self.totalButtons - 1);
+           }
+         }
+
+        // Create the numeric buttons.
+        for (var i = begin; i <= end; i++) {
+          if (i === opt.currentPage) {
+            str = str.concat('<li class="active"><a>' + i + '</a></li>');
+          } else {
+            str = str.concat('<li><a>' + i + '</a></li>')
+          }
+        }
+
+
+        // Create the next button.
+        if (opt.currentPage == opt.totalPages) {
+          str = str.concat('<li class="disabled"><a>next</a></li>')
+        } else {
+          str = str.concat('<li><a>next</a></li>');
+        }
+
         str = str.concat('</ul>');
+
         $(self.element).append(str);
         $(self.element).find('ul li').click(function() {
-          self.changePage($(this).find('a').text());
+          var page = parseInt($(this).find('a').text());
+          opt.currentPage = page;
+          self.changePage(page);
         })
     }
 
@@ -83,59 +180,6 @@
         }
       });
     }
-
-  // var self = this;
-  //
-  // self.defaults = {
-  //   message: 'This is a default Message'
-  // };
-  //
-  // self.options = {};
-  //
-  // var methods = {
-  //   init: function(options) {
-  //     options = $.extend(self.options, self.defaults, options);
-  //     return this.each(function() {
-  //       $(this).text(options.message);
-  //     });
-  //   },
-  //   setOption: function(key, value) {
-  //     if (value) {
-  //       self.options[key] = value;
-  //     } else {
-  //       return self.options[key];
-  //     }
-  //   }
-  // };
-  //
-  // $.fn.simplePagination = function(method) {
-  //   if (methods[method]) {
-  //     return methods[method].apply(this, Array.prototype.slice.call(arguments, 1));
-  //   } else if (typeof method === 'object' || !method) {
-  //     return methods.init.apply(this, arguments);
-  //   } else {
-  //     console.log('Method doesn\'t exists');
-  //   }
-  // }
-
-  // $.fn.simplePagination = function(options) {
-  //   var $target = this;
-  //
-  //   var opts = {
-  //     maxBtnsVisible: (options.maxButtonsVisible ? options.maxButtonsVisible : '5'),
-  //     initialPage: (options.initialPage ? options.initialPage: 1),
-  //     totalPages: options.totalPages,
-  //   }
-  //   if (options.te) {
-  //     $target('TE: ' + options.te)
-  //   } else {
-  //     // Clear the target
-  //     $target.empty();
-  //     // Create the paginator
-  //     var str = '<ul class="pagination"> oi </ul>'
-  //     $target.html(str);
-  //   }
-  // }
 
 
 })(jQuery, window, document);
