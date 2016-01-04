@@ -1,14 +1,18 @@
 ;(function($, window, document, undefined) {
-
+  'use strict';
   /**
   * Simple boostrap pagination v 0.1
   */
-
   var pluginName = 'simplePaginator';
   var defaults = {
-      maxButtonsVisible: 5,
       totalPages: 7,
+      maxButtonsVisible: 5,
       currentPage: 1,
+      nextLabel: 'next',
+      prevLabel: 'prev',
+      firstLabel: 'first',
+      lastLabel: 'last',
+      clickCurrentPage: true,
       pageChange: function(page) { console.log(page) }
     };
 
@@ -18,15 +22,7 @@
     * options - object with the plugin options
     */
     function Plugin(element, options) {
-      //TODO:  Verify the other options.
-
-      if (!options.pageChange) {
-        $.error('function pageChange() its not defined');
-      } else {
-        if (typeof options.pageChange !== 'function') {
-          $.error('pageChange is not a function');
-        }
-      }
+      verifyOptions(options)
 
       this.element = element;
       this.options = $.extend({}, defaults, options);
@@ -36,12 +32,22 @@
       changeTotalButtons(this);             // Change total buttons created by the Paginator
 
       this.setTotalPages = function(total) {
+        if (total < 1) {
+          $.error('Total Pages can\'t be less than 1');
+        }
         this.options.totalPages = total;
         changeTotalButtons(this);
         createPaginator(this);
       }
 
       this.changePage = function(page) {
+        if (page < 1) {
+          $.error('Page can\'t be less than 1');
+        } else if (page > this.options.totalPages) {
+          $.error('Page is bigger than total pages');
+        }
+
+        this.options.currentPage = page;
         this.options.pageChange(page);
         createPaginator(this);
       }
@@ -49,26 +55,43 @@
       this.init();
     }
     Plugin.prototype.init = function() {
-        //$(this.element).text(this.options.propertyName);
-        // For now, only call createPaginator()
+      if (this.options.clickCurrentPage) {
+        this.changePage(this.options.currentPage);
+      } else {
         createPaginator(this);
+      }
     };
 
-    changeTotalButtons = function(self) {
+    var verifyOptions = function(opts) {
+      //TODO:  Verify the other options.
+      if (!opts.pageChange) {
+        $.error('function pageChange() its not defined');
+      } else {
+        if (typeof opts.pageChange !== 'function') {
+          $.error('pageChange is not a function');
+        }
+      }
+    };
+
+    var changeTotalButtons = function(self) {
+      // options.totalButtons - Its necessary to create the numeric buttons.
       self.options.totalButtons = Math.min(self.options.totalPages, self.options.maxButtonsVisible);
     };
 
-    createPaginator = function(self) {
+    var createPaginator = function(self) {
         var opt = self.options;
         //Clear the this.element
         $(self.element).empty();
 
         var str = '<ul class="pagination">';
-        // Create the prev button
-        if (opt.currentPage == 1) {
-          str = str.concat('<li class="disabled"><a>prev</a></li>')
+
+        // Create the prev and first button
+        if (opt.currentPage === 1) {
+          str = str.concat('<li class="disabled"><a>', opt.firstLabel, '</a></li>');
+          str = str.concat('<li class="disabled"><a>', opt.prevLabel, '</a></li>');
         } else {
-          str = str.concat('<li><a>prev</a></li>');
+          str = str.concat('<li><a style="cursor:pointer;">', opt.firstLabel, '</a></li>');
+          str = str.concat('<li><a style="cursor:pointer;">', opt.prevLabel, '</a></li>');
         }
 
         // Create the numeric buttons.
@@ -77,7 +100,7 @@
         var end = begin + opt.totalButtons - 1;
 
         /*
-         * TODO: Align the values in the begin and end variables if the user has the
+         * Align the values in the begin and end variables if the user has the
          * possibility that select a page that doens't appear in the paginador.
          * e.g currentPage = 1, and user go to the 20 page.
          */
@@ -128,26 +151,45 @@
         // Create the numeric buttons.
         for (var i = begin; i <= end; i++) {
           if (i === opt.currentPage) {
-            str = str.concat('<li class="active"><a>' + i + '</a></li>');
+            str = str.concat('<li class="active"><a style="cursor:pointer;">' + i + '</a></li>');
           } else {
-            str = str.concat('<li><a>' + i + '</a></li>')
+            str = str.concat('<li><a style="cursor:pointer;">' + i + '</a></li>')
           }
         }
 
-
-        // Create the next button.
+        // Create the 'next' and 'last' button.
         if (opt.currentPage == opt.totalPages) {
-          str = str.concat('<li class="disabled"><a>next</a></li>')
+          str = str.concat('<li class="disabled"><a>', opt.nextLabel, '</a></li>');
+          str = str.concat('<li class="disabled"><a>', opt.lastLabel, '</a></li>')
         } else {
-          str = str.concat('<li><a>next</a></li>');
+          str = str.concat('<li><a style="cursor:pointer;">', opt.nextLabel, '</a></li>');
+          str = str.concat('<li><a style="cursor:pointer;">', opt.lastLabel, '</a></li>');
         }
-
         str = str.concat('</ul>');
 
         $(self.element).append(str);
-        $(self.element).find('ul li').click(function() {
-          var page = parseInt($(this).find('a').text());
-          opt.currentPage = page;
+        $(self.element).find('ul li').not('.disabled').not('.active').click(function() {
+          var btn = $(this).find('a').text();
+          var page;
+
+          switch (btn) {
+            case opt.firstLabel:
+              page = 1;
+              break;
+            case  opt.prevLabel:
+              page = opt.currentPage - 1;
+              break;
+            case opt.nextLabel:
+              page = opt.currentPage + 1;
+              break;
+            case opt.lastLabel:
+              page = opt.totalPages;
+              break;
+            default:
+              page = parseInt(btn);
+          }
+          //var page = parseInt($(this).find('a').text());
+          //opt.currentPage = page;
           self.changePage(page);
         })
     }
