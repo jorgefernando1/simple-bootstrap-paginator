@@ -4,28 +4,60 @@
   <title>Simple-paginator-test</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="assets/bootstrap-theme.min.css">
-  <script src="assets/jquery.min.js"></script>
-  <script src="assets/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+
+  <style media="screen" type="text/css">
+    legend {
+      padding-top: 20px;
+    }
+  </style>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <h4> Simple test pagination </h4>
-    <br/>
-    <div id="content" class="well well-sm">
-      Content go here!
-    <div>
+    <div class="row">
+      <div class="col-xs-12">
+        <legend> Simple bootstrap paginator - sample usage </legend>
+      </div>
+    </div>
 
-    <div id="pagination"></div>
+    <div class="row">
+      <div class="col-xs-8 col-xs-offset-2">
+        <h4> Content: </h4>
+        <div id="content" class="well">
+          <p class="text-center">Content go here! </p>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-12">
+        <div id="pagination" class="text-center"></div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-12 text-center">
+        <a id= "changeTotalPages" class="btn btn-default">Change total pages to 10. </a>
+        <a id="changePage" class="btn btn-default">Select page 3. </a>
+      </div>
+    </div>
   </div>
   <script src="simple-bootstrap-paginator.js"></script>
-
   <script>
+    var pag = $('#pagination').simplePaginator({
+      totalPages: 6,
+      pageChange: function(page) {
+        $('#content').empty().text('Page is ' + page);
+      }
+    });
 
-    $('#pagination').simplePagination()
+    $('#changeTotalPages').click(function() {
+      pag.simplePaginator('setTotalPages', 10);
+    })
 
-
+    $('#changePage').click(function() {
+      pag.simplePaginator('changePage', 3);
+    })
   </script>
-
 </body>
 </html>
