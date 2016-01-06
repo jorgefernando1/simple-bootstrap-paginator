@@ -22,31 +22,30 @@
     * options - object with the plugin options
     */
     function Plugin(element, options) {
-      verifyOptions(options)
+      options = verifyOptions(options)
 
       this.element = element;
       this.options = $.extend({}, defaults, options);
       this._defaults = defaults;
       this._name = pluginName;
 
-      changeTotalButtons(this);             // Change total buttons created by the Paginator
+      changeTotalButtons(this.options);             // Change total buttons created by the Paginator
 
       this.setTotalPages = function(total) {
         if (total < 1) {
-          $.error('Total Pages can\'t be less than 1');
+          throw('Total Pages can\'t be less than 1');
         }
         this.options.totalPages = total;
-        changeTotalButtons(this);
+        changeTotalButtons(this.options);
         createPaginator(this);
       }
 
       this.changePage = function(page) {
         if (page < 1) {
-          $.error('Page can\'t be less than 1');
+          throw('Page can\'t be less than 1');
         } else if (page > this.options.totalPages) {
-          $.error('Page is bigger than total pages');
+          throw('Page is bigger than total pages');
         }
-
         this.options.currentPage = page;
         this.options.pageChange(page);
         createPaginator(this);
@@ -63,19 +62,61 @@
     };
 
     var verifyOptions = function(opts) {
-      //TODO:  Verify the other options.
+      // TotalPages - verifications
+      if (!opts.totalPages) {
+        throw('totalPages is not defined');
+      }
+      opts.totalPages = verifyOptionsNumber(opts.totalPages);
+
+      // pageChange() - verifications
       if (!opts.pageChange) {
-        $.error('function pageChange() its not defined');
-      } else {
-        if (typeof opts.pageChange !== 'function') {
-          $.error('pageChange is not a function');
+        throw('function pageChange() its not defined');
+      } else if (typeof opts.pageChange !== 'function') {
+          throw('pageChange is not a function');
+      }
+
+      if (opts.maxButtonsVisible) {
+        opts.maxButtonsVisible = verifyOptionsNumber(opts.maxButtonsVisible);
+      }
+      if (opts.currentPage) {
+        opts.currentPage = verifyOptionsNumber(opts.currentPage);
+      }
+
+      // if has a label, convert to String.
+      if (opts.firstLabel) {
+        opts.firstLabel = opts.firstLabel.toString();
+      }
+      if (opts.nextLabel) {
+        opts.nextLabel = opts.nextLabel.toString();
+      }
+      if (opts.prevLabel) {
+        opts.prevLabel = opts.prevLabel.toString();
+      }
+      if (opts.lastLabel) {
+        opts.lastLabel = opts.lastLabel.toString();
+      }
+
+      // check clickCurrentPage
+      if (opts.clickCurrentPage) {
+        if (typeof opts.clickCurrentPage !== 'boolean') {
+          throw 'clickCurrentPage is must be a boolean';
         }
       }
+      return opts;
     };
 
-    var changeTotalButtons = function(self) {
+    var verifyOptionsNumber = function(param) {
+      if (typeof param !== 'number') {
+        throw (param + ' is not a number');
+      } else if (param < 1) {
+        throw (param + ' must be bigger than 0');
+      }
+      return Math.floor(param);
+    };
+
+    var changeTotalButtons = function(options) {
       // options.totalButtons - Its necessary to create the numeric buttons.
-      self.options.totalButtons = Math.min(self.options.totalPages, self.options.maxButtonsVisible);
+      options.totalButtons = Math.min(options.totalPages, options.maxButtonsVisible);
     };
 
     var createPaginator = function(self) {
@@ -144,7 +185,7 @@
          if ((begin === opt.currentPage) && (opt.totalPages != 1)) {
            if (opt.currentPage != 1) {
              end = opt.currentPage + 1;
-             begin = end - (self.totalButtons - 1);
+             begin = end - (opt.totalButtons - 1);
            }
          }
 
@@ -212,7 +253,7 @@
           if (instance[options]) {
             instance[options].apply(instance, after);
           } else {
-            $.error('Method ' + options + 'doesn\'t exists');
+            throw('Method ' + options + 'doesn\'t exists');
           }
         } else {
           // Create and register the Plugin.
