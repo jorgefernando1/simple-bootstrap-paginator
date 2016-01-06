@@ -1,0 +1,22 @@
+{
+  "name": "simple-bootstrap-paginator",
+  "main": "simple-bootstrap-paginator.js",
+  "homepage": "https://github.com/jorgefernando1/simple-bootstrap-paginator",
+  "authors": [
+    "Jorge Fernando Alves Feitoza <jorge.fernando1@live.com>"
+  ],
+  "description": "A simple way to create pagination in your simple page application",
+  "moduleType": [],
+  "keywords": [
+    "paginator",
+    "bootstrap"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
