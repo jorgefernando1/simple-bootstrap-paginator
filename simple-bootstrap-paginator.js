@@ -51,6 +51,10 @@
         createPaginator(this);
       }
 
+      this.hide = function() {
+        $(this.element).empty();
+      }
+
       this.init();
     }
     Plugin.prototype.init = function() {
