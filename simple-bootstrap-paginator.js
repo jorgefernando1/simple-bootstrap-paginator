@@ -55,6 +55,15 @@
         $(this.element).empty();
       }
 
+      this.setPageChangeFn = function(pageChange) {
+        if (typeof pageChange !== 'function') {
+          throw ('pageChange is not a function');
+        }
+        this.options.pageChange = pageChange;
+        this.options.currentPage = (currentPage ? currentPage: 1);
+        this.options.pageChange(this.options.currentPage);
+      }
+
       this.init();
     }
     Plugin.prototype.init = function() {
