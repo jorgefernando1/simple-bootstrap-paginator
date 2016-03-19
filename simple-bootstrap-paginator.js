@@ -55,7 +55,7 @@
         $(this.element).empty();
       }
 
-      this.setPageChangeFn = function(pageChange) {
+      this.setPageChangeFn = function(pageChange, currentPage) {
         if (typeof pageChange !== 'function') {
           throw ('pageChange is not a function');
         }
