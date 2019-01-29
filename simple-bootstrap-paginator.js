@@ -141,11 +141,11 @@
 
         // Create the prev and first button
         if (opt.currentPage === 1) {
-          str = str.concat('<li class="disabled"><a>', opt.firstLabel, '</a></li>');
-          str = str.concat('<li class="disabled"><a>', opt.prevLabel, '</a></li>');
+          str = str.concat('<li class="page-item disabled"><a class="page-link">', opt.firstLabel, '</a></li>');
+          str = str.concat('<li class="page-item disabled"><a class="page-link">', opt.prevLabel, '</a></li>');
         } else {
-          str = str.concat('<li><a style="cursor:pointer;">', opt.firstLabel, '</a></li>');
-          str = str.concat('<li><a style="cursor:pointer;">', opt.prevLabel, '</a></li>');
+          str = str.concat('<li class="page-item"><a class="page-link" style="cursor:pointer;">', opt.firstLabel, '</a></li>');
+          str = str.concat('<li class="page-item"><a class="page-link" style="cursor:pointer;">', opt.prevLabel, '</a></li>');
         }
 
         // Create the numeric buttons.
@@ -205,19 +205,19 @@
         // Create the numeric buttons.
         for (var i = begin; i <= end; i++) {
           if (i === opt.currentPage) {
-            str = str.concat('<li class="active"><a style="cursor:pointer;">' + i + '</a></li>');
+            str = str.concat('<li class="page-item active"><a class="page-link" style="cursor:pointer;">' + i + '</a></li>');
           } else {
-            str = str.concat('<li><a style="cursor:pointer;">' + i + '</a></li>')
+            str = str.concat('<li class="page-item"><a class="page-link" style="cursor:pointer;">' + i + '</a></li>')
           }
         }
 
         // Create the 'next' and 'last' button.
         if (opt.currentPage == opt.totalPages) {
-          str = str.concat('<li class="disabled"><a>', opt.nextLabel, '</a></li>');
-          str = str.concat('<li class="disabled"><a>', opt.lastLabel, '</a></li>')
+          str = str.concat('<li class="page-item disabled"><a class="page-link">', opt.nextLabel, '</a></li>');
+          str = str.concat('<li class="page-item disabled"><a class="page-link">', opt.lastLabel, '</a></li>')
         } else {
-          str = str.concat('<li><a style="cursor:pointer;">', opt.nextLabel, '</a></li>');
-          str = str.concat('<li><a style="cursor:pointer;">', opt.lastLabel, '</a></li>');
+          str = str.concat('<li class="page-item"><a class="page-link" style="cursor:pointer;">', opt.nextLabel, '</a></li>');
+          str = str.concat('<li class="page-item"><a class="page-link" style="cursor:pointer;">', opt.lastLabel, '</a></li>');
         }
         str = str.concat('</ul>');
 
